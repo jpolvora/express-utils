@@ -1,19 +1,28 @@
+/**
+ * @ Author: Jone Pólvora
+ * @ Create Time: 2019-07-24 18:01:49
+ * @ Description:
+ * @ Modified by: Jone Pólvora
+ * @ Modified time: 2019-07-24 19:48:48
+ */
+
+
 const util = require('util')
+
 const defOpts = {
   key: 'monkey_patch',
   executed: 'monkey_executed',
   silent: false,
   noop: () => { }
 }
+
 /**
+ * Return a new instance of Money Patcher with options provided
  *
- *
- * @param {*} thisArg
- * @param {*} method
- * @param {*} cb
- * @returns
+ * @param {Object} opts
+ * @returns New Monkey instance
  */
-monkey = function (opts) {
+function Monkey(opts) {
   const options = Object.assign({}, defOpts, opts)
   const patched = Symbol(options.key)
 
@@ -40,10 +49,9 @@ monkey = function (opts) {
       }
     }
 
-    thisArg[method] = fn[patched];
-
-    return true;
+    return thisArg[method] = fn[patched];
   }
 }
 
-module.exports = monkey;
+module.exports = Monkey;
+module.exports.monkey = new Monkey()
