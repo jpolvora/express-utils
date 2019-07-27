@@ -1,0 +1,1 @@
+module.exports = function fn_test_ejs($helpers) { var $model = this; var r=[];r.push("hello, ");r.push( $model.stranger );r.push("");return r.join(""); }

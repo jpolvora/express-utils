@@ -19,7 +19,7 @@ function createLoggers(namespace, out, levels) {
     loggers[level] = logger;
     logger.log = function (...args) {
       const msg = util.format(...args)
-      return out[level](`DEBUG:${msg}`)
+      return out[level](`${msg} [from debug]`)
     }
     logger.log('just created this logger: %o', logger.namespace)
   }

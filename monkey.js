@@ -3,7 +3,7 @@
  * @ Create Time: 2019-07-24 18:01:49
  * @ Description:
  * @ Modified by: Jone Pólvora
- * @ Modified time: 2019-07-24 19:48:48
+ * @ Modified time: 2019-07-24 21:05:18
  */
 
 
@@ -28,12 +28,12 @@ function Monkey(opts) {
 
   return (thisArg, method, cb) => {
     if (typeof thisArg !== "object" || typeof method !== "string" || typeof cb !== "function") {
-      if (!silent) throw new Error('Provided arguments must be: thisArg: Object, method: String, cb: Function')
+      if (!options.silent) throw new Error('Provided arguments must be: thisArg: Object, method: String, cb: Function')
       return false;
     }
 
     if (typeof thisArg[method] !== "function") {
-      if (!silent) throw new Error("Method not found: " + method + " on provided thisArg");
+      if (!options.silent) throw new Error("Method not found: " + method + " on provided thisArg");
       return false;
     }
     const fn = thisArg[method].bind(thisArg)
@@ -48,6 +48,11 @@ function Monkey(opts) {
         return cb(fn, ...args);
       }
     }
+
+    Object.defineProperty(fn[patched], 'name', {
+      value: "patched_" + method,
+      configurable: true,
+    })
 
     return thisArg[method] = fn[patched];
   }

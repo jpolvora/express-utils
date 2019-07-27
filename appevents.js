@@ -1,12 +1,20 @@
 const monkey = require('./monkey').monkey
-
-const debug = require('./debug.config')('app:appevents', console)
+const { debug, log, info, warn, error } = console;
 const util = require('util')
-debug.log = console.log.bind(console)
 
 const { EventEmitter } = require('events')
 
-module.exports = (app) => {
+function emitEvent(url, event) {
+  const emitter = this;
+  return function (fn, ...args) {
+    emitter.emit(event, url)
+    emitter.emit('*', { event, url })
+
+    return fn(...args)
+  }
+}
+
+module.exports = (app, events = ['render', 'redirect', 'status', 'cookie', 'json']) => {
   const inspect = util.inspect.bind(util)
   const emitter = new EventEmitter()
 
@@ -16,30 +24,14 @@ module.exports = (app) => {
     debug('new listener added', inspect(args))
   })
 
-  function emitEvent(event) {
-    return function (fn, ...args) {
-      const eventArgs = {
-        event,
-        params: [...args].slice().unshift(event)
-      }
-      emitter.emit(event, { ...eventArgs })
-      emitter.emit('*', { ...eventArgs })
-
-      return fn(...args)
-    }
-  }
-
   app.use(function (req, res, next) {
     debug('wrapping methods for current request: ', req.path)
+    const _emitter = emitEvent.bind(emitter)
 
-    monkey(res, "render", emitEvent('render'))
-    monkey(res, "redirect", emitEvent('redirect'))
-    monkey(res, "status", emitEvent('status'))
-    monkey(res, "json", emitEvent('json'))
-    monkey(res, "end", emitEvent('end'))
-    monkey(res, "send", emitEvent('send'))
-    monkey(res, "header", emitEvent('header'))
-    monkey(res, "cookie", emitEvent('cookie'))
+    events.forEach(evt => {
+      return monkey(res, evt, _emitter(req.originalUrl, evt))
+    });
+
 
     return next();
   })
